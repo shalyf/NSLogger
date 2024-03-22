@@ -1859,9 +1859,19 @@ didReceiveMessages:(NSArray *)theMessages
 	NSArray *selectedMessages = [_displayedMessages objectsAtIndexes:_logTable.selectedRowIndexes];
 	if (selectedMessages.count == 0)
 		return;
+    
+    NSPasteboard *generalPasteboard = [NSPasteboard generalPasteboard];
+    
+    if (selectedMessages.count == 1) {
+        NSImage *image = [selectedMessages.firstObject valueForKeyPath:NSStringFromSelector(@selector(image))];
+        if (image) {
+            [generalPasteboard declareTypes:@[ NSPasteboardTypeTIFF ] owner:nil];
+            [generalPasteboard setData:[image TIFFRepresentation] forType:NSPasteboardTypeTIFF];
+            return;
+        }
+    }
 	
 	NSArray *messages = [selectedMessages valueForKeyPath:NSStringFromSelector(@selector(message))];
-	NSPasteboard *generalPasteboard = [NSPasteboard generalPasteboard];
 	[generalPasteboard declareTypes:@[ NSPasteboardTypeString ] owner:nil];
 	[generalPasteboard setString:[messages componentsJoinedByString:@"\n"] forType:NSPasteboardTypeString];
 }

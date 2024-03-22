@@ -63,7 +63,7 @@
 	[storage replaceCharactersInRange:NSMakeRange(0, [storage length]) withString:@""];
 
 	NSUInteger numMessages = [messages count];
-	[self.detailsInfo setStringValue:[NSString stringWithFormat:NSLocalizedString(@"Details for %d log messages", @""), numMessages]];
+	[self.detailsInfo setStringValue:[NSString stringWithFormat:NSLocalizedString(@"Details for %ld log messages", @""), numMessages]];
 	[self.progressIndicator setHidden:NO];
 	[self.progressIndicator startAnimation:self];
 
@@ -88,9 +88,25 @@
 				NSAttributedString *as = [[NSAttributedString alloc] initWithString:[msg textRepresentation]
 																		 attributes:(msg.contentsType == kMessageString) ? textAttributes : dataAttributes];
 				[strings addObject:as];
+                
+                CGSize visibleSize = NSScreen.mainScreen.visibleFrame.size;
+                if (msg.contentsType == kMessageImage) {
+                    NSTextAttachment *attachment = [[NSTextAttachment alloc] init];
+                    [attachment setImage: msg.image];
+                    CGSize imageSize = msg.imageSize;
+                    if (imageSize.height > visibleSize.height) {
+                        imageSize.width *= visibleSize.height / imageSize.height;
+                        imageSize.height = visibleSize.height;
+                    }
+                    CGRect rect = CGRectMake((visibleSize.width - imageSize.width) / 2, 0, imageSize.width, imageSize.height);
+                    [attachment setBounds:rect];
+                    NSAttributedString *is = [NSAttributedString attributedStringWithAttachment: attachment];
+                    [strings addObject:is];
+                }
 			}
 			dispatch_async(dispatch_get_main_queue(), ^{
 				[storage beginEditing];
+                
 				for (NSAttributedString *as in strings)
 					[storage replaceCharactersInRange:NSMakeRange([storage length], 0) withAttributedString:as];
 				[storage endEditing];
