@@ -45,6 +45,7 @@
 @property (nonatomic, weak) IBOutlet NSPopUpButton *quickFilter;
 @property (nonatomic, weak) IBOutlet NSButton *showFunctionNamesButton;
 @property (nonatomic, weak) IBOutlet NSSearchField *quickFilterTextField;
+@property (nonatomic, weak) IBOutlet NSSearchField *quickSearchTextField;
 
 @property (nonatomic, retain) IBOutlet NSArrayController *filterSetsListController;
 @property (nonatomic, retain) IBOutlet NSArrayController *filterListController;
@@ -70,6 +71,9 @@
 @property (nonatomic, retain) NSString *filterString;
 @property (nonatomic, retain) NSMutableSet *filterTags;
 @property (nonatomic, assign) int logLevel;
+
+@property (nonatomic, retain) NSString *searchString;
+@property (nonatomic, assign) int currentSearchIndex;
 
 @property (nonatomic, retain) NSString *info;
 @property (nonatomic, retain) NSMutableArray *displayedMessages;
@@ -110,6 +114,8 @@
 
 - (IBAction)clearCurrentLog:(id)sender;
 - (IBAction)clearAllLogs:(id)sender;
+
+- (IBAction)search:(id)sender;
 
 - (void)updateMenuBar:(BOOL)documentIsFront;
 

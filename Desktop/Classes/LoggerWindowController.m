@@ -334,7 +334,7 @@ static NSArray *sXcodeFileExtensions = nil;
 #pragma mark Target Action
 
 - (IBAction)performFindPanelAction:(id)sender {
-    [self.window makeFirstResponder:_quickFilterTextField];
+    [self.window makeFirstResponder:_quickSearchTextField];
 }
 
 
@@ -1109,6 +1109,50 @@ void runSystemCommand(NSString *cmd)
 	if (![[NSUserDefaults standardUserDefaults] boolForKey:kPrefKeepMultipleRuns] && numRuns <= 1)
 		return (id)kCFBooleanFalse;
 	return (id)kCFBooleanTrue;
+}
+
+- (void)setSearchString:(NSString *)searchString {
+    if (![_searchString isEqual:searchString]) {
+        _currentSearchIndex = -1;
+    }
+    _searchString = [searchString copy];
+}
+
+- (void)search:(id)sender {
+    if (_searchString == nil || [_searchString isEqual: @""]) {
+        _currentSearchIndex = -1;
+        return;
+    }
+    
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"messageText CONTAINS[cd] %@", _searchString];
+    NSArray *searchResults = [_displayedMessages filteredArrayUsingPredicate:predicate];
+    
+    if (searchResults.count == 0) {
+        _currentSearchIndex = -1;
+        NSAlert *alert = [[NSAlert alloc] init];
+        [alert setMessageText:@"NotFound!"];
+        [alert addButtonWithTitle:NSLocalizedString(@"Cancel", @"")];
+        [self.window beginSheet:alert.window completionHandler:nil];
+        return;
+    }
+    
+    for (int i = 0; i < searchResults.count; i++) {
+        int index = (int)[_displayedMessages indexOfObject:searchResults[i]];
+        if (_currentSearchIndex >= index) {
+            if (i == searchResults.count - 1 && searchResults.count > 1) {
+                int index = (int)[_displayedMessages indexOfObject:searchResults[0]];
+                _currentSearchIndex = index;
+            } else {
+                continue;
+            }
+        } else {
+            _currentSearchIndex = index;
+        }
+        [_logTable scrollRowToVisible:index];
+        [_logTable deselectAll:_logTable];
+        [_logTable selectRowIndexes:[NSIndexSet indexSetWithIndex:index] byExtendingSelection:YES];
+        return;
+    }
 }
 
 - (void)setFilterString:(NSString *)newString
